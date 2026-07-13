@@ -15,17 +15,33 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 from pathlib import Path
 from typing import List
+
+from dotenv import load_dotenv
+
+# Load .env from project root
+_ENV_PATHS = [
+    Path(__file__).resolve().parent.parent / ".env",  # project root
+    Path(".env"),                                      # cwd fallback
+]
+for _p in _ENV_PATHS:
+    if _p.exists():
+        load_dotenv(_p)
+        break
 
 import requests
 
 
 # ---------------------------------------------------------------------------
-# Configuration
+# Configuration (from .env, then env vars, then defaults)
 # ---------------------------------------------------------------------------
 
-DEFAULT_BASE_URL = "http://localhost:8000"
+DEFAULT_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
+DEFAULT_IMAGE_PATH = os.environ.get("IMAGE_PATH")
+DEFAULT_IMAGE_URL = os.environ.get("IMAGE_URL")
+DEFAULT_BATCH_DIR = os.environ.get("BATCH_DIR")
 
 
 # ---------------------------------------------------------------------------
@@ -231,10 +247,10 @@ class Sam3Client:
 
 def main():
     parser = argparse.ArgumentParser(description="SAM3 API client examples")
-    parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="API base URL")
-    parser.add_argument("--image", default=None, help="Path to a single bolt image")
-    parser.add_argument("--image-url", default=None, help="URL of a bolt image")
-    parser.add_argument("--batch-dir", default=None, help="Directory of images for batch demo")
+    parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help=f"API base URL (.env API_BASE_URL or {DEFAULT_BASE_URL})")
+    parser.add_argument("--image", default=DEFAULT_IMAGE_PATH, help="Path to a single bolt image (.env IMAGE_PATH)")
+    parser.add_argument("--image-url", default=DEFAULT_IMAGE_URL, help="URL of a bolt image (.env IMAGE_URL)")
+    parser.add_argument("--batch-dir", default=DEFAULT_BATCH_DIR, help="Directory of images for batch demo (.env BATCH_DIR)")
     args = parser.parse_args()
 
     # Always check health first

@@ -20,6 +20,12 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
+from dotenv import load_dotenv
+
+# Load .env from project root (parent of src/)
+_PROJECT_ROOT = Path(os.environ.get("BOLT_MARKING_ROOT", Path(__file__).resolve().parent.parent))
+load_dotenv(_PROJECT_ROOT / ".env")
+
 import cv2
 import numpy as np
 import requests
@@ -29,14 +35,17 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
-# Resolve project root & imports (same convention as sam3_marking_detector)
+# Configuration (from .env, then env vars, then defaults)
 # ---------------------------------------------------------------------------
-PROJECT_ROOT = Path(os.environ.get("BOLT_MARKING_ROOT", Path(__file__).resolve().parent.parent))
+PROJECT_ROOT = _PROJECT_ROOT
 DEFAULT_SAM3_ROOT = Path(os.environ.get("SAM3_ROOT", "/home/cvailab/zhaoza/sam3"))
-DEFAULT_CHECKPOINT = str(PROJECT_ROOT / "models" / "sam3.pt")
-DEFAULT_FEATURE_MODEL = str(
-    PROJECT_ROOT / "models" / "feature_judger" / "random_forest_final.joblib"
+DEFAULT_CHECKPOINT = os.environ.get("CHECKPOINT", str(PROJECT_ROOT / "models" / "sam3.pt"))
+DEFAULT_FEATURE_MODEL = os.environ.get(
+    "FEATURE_MODEL", str(PROJECT_ROOT / "models" / "feature_judger" / "random_forest_final.joblib")
 )
+DEFAULT_DEVICE = os.environ.get("DEVICE", "cuda")
+DEFAULT_HOST = os.environ.get("HOST", "0.0.0.0")
+DEFAULT_PORT = int(os.environ.get("PORT", "8000"))
 
 from sam3_marking_detector import Sam3MarkingDetector, Sam3DetectionResult  # noqa: E402
 
@@ -105,7 +114,7 @@ _feature_model = None  # loaded lazily
 def _get_detector() -> Sam3MarkingDetector:
     global _detector
     if _detector is None:
-        device = os.environ.get("DEVICE", "cuda")
+        device = os.environ.get("DEVICE", DEFAULT_DEVICE)
         checkpoint = os.environ.get("CHECKPOINT", DEFAULT_CHECKPOINT)
         _detector = Sam3MarkingDetector(
             checkpoint_path=checkpoint,
@@ -203,7 +212,7 @@ def health():
     return HealthResponse(
         status="ok",
         model_loaded=_detector is not None,
-        device=os.environ.get("DEVICE", "cuda"),
+        device=os.environ.get("DEVICE", DEFAULT_DEVICE),
         uptime_seconds=round(time.time() - _START_TIME, 1),
     )
 
@@ -214,7 +223,7 @@ def info():
         project_root=str(PROJECT_ROOT),
         checkpoint=os.environ.get("CHECKPOINT", DEFAULT_CHECKPOINT),
         feature_model=os.environ.get("FEATURE_MODEL", DEFAULT_FEATURE_MODEL),
-        device=os.environ.get("DEVICE", "cuda"),
+        device=os.environ.get("DEVICE", DEFAULT_DEVICE),
         sam_root=str(DEFAULT_SAM3_ROOT),
     )
 
@@ -298,14 +307,15 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="SAM3 Bolt Marking Detector Web API")
-    parser.add_argument("--host", type=str, default="0.0.0.0")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--host", type=str, default=None, help=f"Override HOST (.env or {DEFAULT_HOST})")
+    parser.add_argument("--port", type=int, default=None, help=f"Override PORT (.env or {DEFAULT_PORT})")
     parser.add_argument("--device", type=str, default=None, help="Override DEVICE env var")
     parser.add_argument("--checkpoint", type=str, default=None, help="Override CHECKPOINT env var")
     parser.add_argument("--feature-model", type=str, default=None, help="Override FEATURE_MODEL env var")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload (dev only)")
     args = parser.parse_args()
 
+    # CLI args override .env / env vars
     if args.device:
         os.environ["DEVICE"] = args.device
     if args.checkpoint:
@@ -313,15 +323,18 @@ def main():
     if args.feature_model:
         os.environ["FEATURE_MODEL"] = args.feature_model
 
-    print(f"Starting SAM3 Bolt Marking Detector API on {args.host}:{args.port}")
-    print(f"  device     = {os.environ.get('DEVICE', 'cuda')}")
+    host = args.host or os.environ.get("HOST", DEFAULT_HOST)
+    port = args.port or int(os.environ.get("PORT", str(DEFAULT_PORT)))
+
+    print(f"Starting SAM3 Bolt Marking Detector API on {host}:{port}")
+    print(f"  device     = {os.environ.get('DEVICE', DEFAULT_DEVICE)}")
     print(f"  checkpoint = {os.environ.get('CHECKPOINT', DEFAULT_CHECKPOINT)}")
     print(f"  feature    = {os.environ.get('FEATURE_MODEL', DEFAULT_FEATURE_MODEL)}")
 
     uvicorn.run(
         "web_api:app",
-        host=args.host,
-        port=args.port,
+        host=host,
+        port=port,
         reload=args.reload,
     )
 
