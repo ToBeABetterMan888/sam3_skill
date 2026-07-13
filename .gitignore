@@ -1,0 +1,6 @@
+/models/sam3.pt
+.idea/
+*.iml
+*.iws
+*.ipr
+out/

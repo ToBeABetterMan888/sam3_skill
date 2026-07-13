@@ -1,0 +1,26 @@
+{
+  "dataset_root": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset",
+  "source_manifest": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_truth_collages/manifest.json",
+  "total_images": 1843,
+  "label_counts": {
+    "normal": 1028,
+    "unknown": 466,
+    "loose": 349
+  },
+  "label_meaning": {
+    "loose": "松动",
+    "normal": "不松动",
+    "unknown": "无标记线"
+  },
+  "missing_single_crops": [],
+  "folders": {
+    "loose": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset/images/loose",
+    "normal": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset/images/normal",
+    "unknown": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset/images/unknown"
+  },
+  "files": {
+    "manifest_json": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset/manifest.json",
+    "manifest_jsonl": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset/manifest.jsonl",
+    "labels_csv": "/Users/guangyu/Desktop/复现Adaptive COT项目/数据清洗备份/industrial_datas/bolt_marking_classification_dataset/labels.csv"
+  }
+}
