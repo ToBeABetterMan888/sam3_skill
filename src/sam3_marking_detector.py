@@ -24,7 +24,7 @@ from PIL import Image
 from sklearn.metrics import classification_report, confusion_matrix
 
 PROJECT_ROOT = Path(os.environ.get("BOLT_MARKING_ROOT", Path(__file__).resolve().parent.parent))
-DEFAULT_SAM3_ROOT = Path(os.environ.get("SAM3_ROOT", "/home/cvailab/zhaoza/sam3"))
+DEFAULT_SAM3_ROOT = Path(os.environ.get("SAM3_ROOT", "/udat/sam/sam3"))
 DEFAULT_CHECKPOINT = PROJECT_ROOT / "models" / "sam3.pt"
 DEFAULT_FEATURE_MODEL = PROJECT_ROOT / "models" / "feature_judger" / "random_forest_final.joblib"
 if str(DEFAULT_SAM3_ROOT) not in sys.path:
