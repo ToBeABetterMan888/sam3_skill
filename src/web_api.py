@@ -38,7 +38,7 @@ from pydantic import BaseModel, Field
 # Configuration (from .env, then env vars, then defaults)
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = _PROJECT_ROOT
-DEFAULT_SAM3_ROOT = Path(os.environ.get("SAM3_ROOT", "/home/cvailab/zhaoza/sam3"))
+DEFAULT_SAM3_ROOT = Path(os.environ.get("SAM3_ROOT", "/udat/sam/sam3"))
 DEFAULT_CHECKPOINT = os.environ.get("CHECKPOINT", str(PROJECT_ROOT / "models" / "sam3.pt"))
 DEFAULT_FEATURE_MODEL = os.environ.get(
     "FEATURE_MODEL", str(PROJECT_ROOT / "models" / "feature_judger" / "random_forest_final.joblib")
